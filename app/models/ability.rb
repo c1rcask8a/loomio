@@ -33,6 +33,16 @@ class Ability
     can :destroy, Membership do |membership|
       membership.can_be_deleted_by? user
     end
+    
+    #
+    # MOTIONS
+    #
+
+    can [:show, :new, :create, :edit, :destroy, :close_voting, :open_voting], Motion do |motion|
+      motion.can_be_edited_by? user
+    end
+
+    can [:show, :new, :create], Motion
 
   end
 end

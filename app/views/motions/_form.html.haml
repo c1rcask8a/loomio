@@ -16,4 +16,5 @@
         =f.commit_button
       =f.input :close_date, as: :hidden
       =f.input :phase, as: :hidden, label: false, value: "voting"
-      =f.input :facilitator_id, as: :hidden, value: current_user.id, label: false
+      -facilitator_id = current_user.nil? ? User.find_by_email("anonymous@loom.io").id : current_user.id
+      =f.input :facilitator_id, as: :hidden, value: facilitator_id, label: false

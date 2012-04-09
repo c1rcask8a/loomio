@@ -1,0 +1,40 @@
+//Dev note: to test, just press play.  
+
+function onFormSubmit(e) {
+  var timestamp = e.values[0];
+  //TODO change to get values off the form
+  var group_id = 1; //e.values[1];
+  var name = "Film night: Awesome"; //e.values[1];
+  var discussion_url = "www.google.com"; //e.values[1];
+  var description = "Come see this film"; //e.values[2];
+  var close_date = "10-06-2012"; //e.values[3];
+  
+  //MailApp.sendEmail("cobb.andrew@gmail.com", "form submitted", "test" + timestamp + ". ");
+  var title = "new";
+  createMotionWithHttpPost(group_id, name, discussion_url, close_date, description);
+}
+
+function createMotionWithHttpPost(group_id, name, discussion_url, close_date, description) {
+
+  var payload = 
+      { "group_id" : group_id,
+        "motion":
+       {
+         "name" : name,
+         "discussion_url" : discussion_url,
+         "close_date" : close_date,
+         "description": description
+       }
+      };
+     
+  var options =
+    {
+      "method" : "post",
+      "payload" : payload
+    };
+
+  var result = UrlFetchApp.fetch("http://loom.io/motions", options);
+  
+  //TODO remove logging after testing
+  Logger.log(result.getContentText());
+}

@@ -1,10 +1,14 @@
 class MotionsController < GroupBaseController
-  before_filter :check_group_read_permissions
-  before_filter :check_motion_create_permissions, only: [:create, :new]
+  
+  skip_before_filter :authenticate_user!, only: [:new, :create]
+  load_and_authorize_resource 
+  before_filter :check_group_read_permissions, except: [:new, :create]
+  # Create/new permissions checked inside of methods
+  #before_filter :check_motion_create_permissions, only: [:create, :new]
   before_filter :check_motion_update_permissions, only: [:update, :edit]
   before_filter :check_motion_destroy_permissions, only: :destroy
   before_filter :check_motion_close_permissions, only: [:open_voting, :close_voting]
-
+  
   def show
     resource
     @motion.open_close_motion
@@ -15,17 +19,37 @@ class MotionsController < GroupBaseController
   end
 
   def new
-    @motion = Motion.new(group: Group.find(params[:group_id]))
+    group = Group.find(params[:group_id])
+    
+    if group.anon_motion_creation || (!current_user.nil? && :check_motion_create_permissions)
+      @motion = Motion.new(group: group)
+    else
+      redirect_to group
+    end
   end
 
   def create
     @motion = Motion.create(params[:motion])
     @motion.author = current_user
+    
+    if @motion.author.nil?
+      @motion.author = User.find_by_email("anonymous@loom.io")
+    end
+
+    if @motion.facilitator_id.nil?
+      @motion.facilitator_id = @motion.author.id
+    end
+    
     @motion.group = Group.find(params[:group_id])
-    if @motion.save
-      redirect_to @motion
-    else
-      redirect_to edit_motion_path(@motion)
+    
+    if @motion.group.anon_motion_creation || (!current_user.nil? && :check_motion_create_permissions)
+      if @motion.save
+        redirect_to @motion
+      else
+        redirect_to edit_motion_path(@motion)
+      end
+    else 
+      redirect_to @motion.group
     end
   end
 
@@ -104,7 +128,7 @@ class MotionsController < GroupBaseController
     end
 
     def check_motion_create_permissions
-      unless group.users.include?(current_user)
+      unless group.users.include?(current_user) 
         flash[:error] = "You don't have permission to create a motion for this group."
         redirect_to :back
       end

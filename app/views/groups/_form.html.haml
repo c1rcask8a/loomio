@@ -11,4 +11,7 @@
         =f.input :members_invitable_by, as: :select, collection: [:members, :admins],
           member_label: Proc.new { |option| group_permissions_label(option) },
           label: "Who can invite members to this group?"
+        %label{for: "group[anon_motion_creation]"} Allow anonymous motion creation:
+        =f.check_box :anon_motion_creation
+      %br
       =f.commit_button
