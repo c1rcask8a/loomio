@@ -111,4 +111,26 @@ describe Group do
       group.requested_users_include?(user2).should be_true
     end
   end
+  
+  context "motions creatable by everyone" do
+    before :each do
+      group.stub(:can_create_motions?).with(user).and_return(true)
+    end
+
+    context "creates a motion" do
+      it "should succeed" do
+      motion_attrs = {'key' => 'value'}
+
+      group.should_receive(:can_create_motion?).with(user).and_return(true)
+      Motion.should_receive(:create).with(motion_attrs).and_return(motion)
+      motion.should_receive(:author=).with(user)
+      motion.should_receive(:group=).with(group)
+      motion.should_receive(:save)
+
+      post :create, :group_id => group.id, :motion => motion_attrs
+
+      response.should be_redirect
+      end
+    end
+  end
 end

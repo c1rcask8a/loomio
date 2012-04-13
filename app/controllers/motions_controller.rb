@@ -4,7 +4,7 @@ class MotionsController < GroupBaseController
   load_and_authorize_resource 
   before_filter :check_group_read_permissions, except: [:new, :create]
   # Create/new permissions checked inside of methods
-  #before_filter :check_motion_create_permissions, only: [:create, :new]
+  before_filter :check_motion_create_permissions, only: [:create, :new]
   before_filter :check_motion_update_permissions, only: [:update, :edit]
   before_filter :check_motion_destroy_permissions, only: :destroy
   before_filter :check_motion_close_permissions, only: [:open_voting, :close_voting]
@@ -21,11 +21,14 @@ class MotionsController < GroupBaseController
   def new
     group = Group.find(params[:group_id])
     
-    if group.anon_motion_creation || (!current_user.nil? && :check_motion_create_permissions)
-      @motion = Motion.new(group: group)
-    else
-      redirect_to group
-    end
+    @motion = Motion.new(group: group)
+    
+    #if group.can_create_motion?(user) || (!current_user.nil? && :check_motion_create_permissions)
+    #if :check_motion_create_permissions
+    #  @motion = Motion.new(group: group)
+    #else
+    #  redirect_to group
+    #end
   end
 
   def create
@@ -42,15 +45,22 @@ class MotionsController < GroupBaseController
     
     @motion.group = Group.find(params[:group_id])
     
-    if @motion.group.anon_motion_creation || (!current_user.nil? && :check_motion_create_permissions)
-      if @motion.save
-        redirect_to @motion
-      else
-        redirect_to edit_motion_path(@motion)
-      end
-    else 
-      redirect_to @motion.group
+    if @motion.save
+      redirect_to @motion
+    else
+      redirect_to edit_motion_path(@motion)
     end
+    
+    #if @motion.group.anon_motion_creation || (!current_user.nil? && :check_motion_create_permissions)
+    #if :check_motion_create_permissions
+    #  if @motion.save
+    #    redirect_to @motion
+    #  else
+    #    redirect_to edit_motion_path(@motion)
+    #  end
+    #else 
+    #  redirect_to @motion.group
+    #end
   end
 
   def destroy
@@ -128,7 +138,8 @@ class MotionsController < GroupBaseController
     end
 
     def check_motion_create_permissions
-      unless group.users.include?(current_user) 
+      #unless group.users.include?(current_user) 
+      unless group.can_create_motion?(current_user)
         flash[:error] = "You don't have permission to create a motion for this group."
         redirect_to :back
       end

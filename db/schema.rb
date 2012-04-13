@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120409081622) do
+ActiveRecord::Schema.define(:version => 20120413230747) do
 
   create_table "groups", :force => true do |t|
     t.string   "name"
@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(:version => 20120409081622) do
     t.string   "viewable_by"
     t.string   "members_invitable_by"
     t.boolean  "anon_motion_creation"
+    t.string   "motions_creatable_by"
   end
 
   create_table "memberships", :force => true do |t|

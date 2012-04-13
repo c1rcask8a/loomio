@@ -4,6 +4,7 @@ class Group < ActiveRecord::Base
   validates_presence_of :name
   validates_inclusion_of :viewable_by, in: PERMISSION_CATEGORIES
   validates_inclusion_of :members_invitable_by, in: PERMISSION_CATEGORIES
+  validates_inclusion_of :motions_creatable_by, in: PERMISSION_CATEGORIES
   after_initialize :set_defaults
 
   has_many :memberships,
@@ -46,6 +47,15 @@ class Group < ActiveRecord::Base
 
   def members_invitable_by=(value)
     write_attribute(:members_invitable_by, value.to_s)
+  end
+  
+  def motions_creatable_by
+    value = read_attribute(:motions_creatable_by)
+    value.to_sym if value.present?
+  end
+
+  def motions_creatable_by=(value)
+    write_attribute(:motions_creatable_by, value.to_s)
   end
 
 
@@ -116,6 +126,11 @@ class Group < ActiveRecord::Base
     end
   end
 
+  def can_create_motion?(user)
+    return true if motions_creatable_by == :everyone
+    return true if (motions_creatable_by == :members && users.include?(user))
+    return true if (motions_creatable_by == :admins && has_admin_user?(user))
+  end
 
   #
   # TAG-RELATED METHODS
