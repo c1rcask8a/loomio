@@ -46,6 +46,7 @@ ActiveRecord::Schema.define(:version => 20120413230747) do
     t.datetime "updated_at"
     t.string   "viewable_by"
     t.string   "members_invitable_by"
+    t.boolean  "anon_motion_creation"
     t.string   "motions_creatable_by"
   end
 
