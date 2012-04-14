@@ -44,5 +44,15 @@ class Ability
 
     can [:show, :new, :create], Motion
 
+    #
+    # DISCUSSIONS / COMMENTS
+    #
+
+    can :add_comment, Discussion do |discussion|
+      discussion.can_add_comment? user
+    end
+
+    can :destroy, Comment, user_id: user.id
+
   end
 end

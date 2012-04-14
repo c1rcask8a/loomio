@@ -1,6 +1,6 @@
 #edit-motion
-
-  %h2=@motion.name
-  %h3=link_to @motion.group.name, group_path(@motion.group), title: "group"
-=render partial: 'form',
-  locals: {form_args: [@motion]}
+  .row
+    .span16
+      %h4.group-title= link_to @motion.group.name, group_path(@motion.group), title: "group"
+      %h2= @motion.name
+      =render 'form', form_args: [@motion]

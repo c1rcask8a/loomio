@@ -17,6 +17,7 @@ class MotionsController < GroupBaseController
     @user_already_voted = @motion.user_has_voted?(current_user)
     @votes_for_graph = @motion.votes_graph_ready
     @vote = Vote.new
+    @comments = @motion.discussion.comment_threads.order("created_at DESC")
   end
 
   def new
@@ -42,7 +43,7 @@ class MotionsController < GroupBaseController
     if @motion.save
       redirect_to @motion
     else
-      redirect_to edit_motion_path(@motion)
+      redirect_to :back
     end
   end
 
@@ -76,13 +77,11 @@ class MotionsController < GroupBaseController
     end
   end
 
-  def toggle_tag_filter 
+  def toggle_tag_filter
     @motion = Motion.find(params[:id])
     @active_tags = params[:tags]
     @clicked_tag = params[:tag]
-    
     render :partial => "motions/votes_filters", :locals => { clicked_tag: @clicked_tag }, :layout => false, :status => :created
-    #render @motion
   end
 
   private

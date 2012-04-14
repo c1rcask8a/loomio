@@ -62,6 +62,7 @@ describe MotionsController do
 
       context "views a motion" do
         it "succeeds" do
+          motion.stub_chain(:discussion, :comment_threads, :order).and_return([])
           get :show, group_id: group.id, id: motion.id
           response.should be_success
         end
@@ -112,6 +113,7 @@ describe MotionsController do
 
     context "showing a motion" do
       it "succeeds" do
+        motion.stub_chain(:discussion, :comment_threads, :order).and_return([])
         get :show, group_id: group.id, id: motion.id
         response.should be_success
       end

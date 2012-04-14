@@ -11,11 +11,6 @@ class GroupsController < GroupBaseController
     create!
   end
 
-  def index
-    @groups = current_user.groups
-    @group_requests = current_user.group_requests
-  end
-
   # CUSTOM CONTROLLER ACTIONS
 
   def invite_member

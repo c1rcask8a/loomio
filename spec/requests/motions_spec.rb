@@ -19,12 +19,46 @@ describe "Motions" do
     end
 
     context "viewing a motion in one of their groups" do
+      it "can see motion discussion" do
+        visit motion_path(id: @motion.id)
+
+        should have_css('#discussion-panel')
+      end
+
+      it "can see 'add comment' form on motions" do
+        visit motion_path(id: @motion.id)
+
+        should have_css('#new-comment')
+      end
+
+      it "can see link to delete their own comments" do
+        @motion.discussion.add_comment(@user, "hello!")
+
+        visit motion_path(id: @motion.id)
+        find('.comment').should have_content('Delete')
+      end
+
+      it "cannot see link to delete other people's comments" do
+        @motion.discussion.add_comment(@user2, "hello!")
+
+        visit motion_path(id: @motion.id)
+        find('.comment').should_not have_content('Delete')
+      end
+    end
+
+    context "viewing a public motion (of a group they don't belong to)" do
       before :each do
+        membership = @group.memberships.find_by_user_id(@user.id)
+        membership.destroy
         visit motion_path(id: @motion.id)
       end
 
-      it "can see motion contents" do
-        should have_content('Test Motion')
+      it "can see motion discussion" do
+        should have_css('#discussion-panel')
+      end
+
+      it "cannot see 'add comment' form on motions" do
+        should_not have_css('#new-comment')
       end
     end
 
@@ -46,6 +80,15 @@ describe "Motions" do
       fill_in 'motion_name', with: 'This is a new motion'
       fill_in 'motion_description', with: 'Blahhhhhh'
       click_on 'Create Motion'
+    end
+
+    it "can disable motion discussion" do
+      visit new_motion_path(group_id: @group.id)
+      fill_in 'motion_name', with: 'This is a new motion'
+      fill_in 'motion_description', with: 'Blahhhhhh'
+      check 'motion_disable_discussion'
+      click_on 'Create Motion'
+      should have_content("Discussions have been disabled for this motion")
     end
   end
 end

@@ -51,12 +51,13 @@ $ ->
     expandableRow.toggle()
     if expandableRow.is(":visible")
       $(this).find(".toggle-button").html('-')
+      graph_legend = $(this).find(".jqplot-table-legend")
       if $(this).hasClass('closed')
-        $(".jqplot-table-legend").addClass('closed')
-        $(".jqplot-table-legend").removeClass('voting')
+        graph_legend.addClass('closed')
+        graph_legend.removeClass('voting')
       else
-        $(".jqplot-table-legend").addClass('voting')
-        $(".jqplot-table-legend").removeClass('closed')
+        graph_legend.addClass('voting')
+        graph_legend.removeClass('closed')
     else
       $(this).find(".toggle-button").html('+')
   )
@@ -65,28 +66,55 @@ $ ->
   $(".no-toggle").click((event) ->
     event.stopPropagation()
   )
-      
+
+  #** limit character count for statement**
+  pluralize_characters = (num) ->
+    if(num == 1)
+      return num + " character"
+    else
+      return num + " characters"
+
+  $("#limited").keyup(() ->
+    chars = $("#limited").val().length
+    left = 249 - chars
+    if(left >= 0)
+      $(".char_count").text(pluralize_characters(left) + " left")
+      $(".clearfix").removeClass("error")
+    else
+      left = left * (-1)
+      $(".char_count").text(pluralize_characters(left) + " too long")
+      $(".clearfix").addClass("error")
+  )
+
+  $(".vote").click((event) ->
+    if $(".clearfix").hasClass("error")
+      $('#new_vote').preventDefault()
+    else
+      $('#new_vote').submit()
+  )
+
+  #** tagging stuff **
   if $("#motion").length > 0
-    $(".group-tags button").not(".not-used").each (index, element) ->   
+    $(".group-tags button").not(".not-used").each (index, element) ->
       $(element).click (event, element)->
         #event.preventDefault()
-        processTagSelection(this) 
-        
+        processTagSelection(this)
+
   processTagSelection = (current_element) ->
     current_tag = current_element.innerText
-    
+
     if (current_tag == "everyone")
       current_tags = ""
     else if ( current_tags.indexOf(current_tag) == -1)
-      current_tags += ".#{current_tag}";
-    else 
+      current_tags += ".#{current_tag}"
+    else
       current_tags = current_tags.replace(".#{current_tag}", "")
-    
+
     showVotesBasedOnTag(current_tags)
     toggleTagClasses(current_element, current_tag, current_tags)
     refreshStatsGraph()
-    
-  showVotesBasedOnTag = (tag_names) -> 
+
+  showVotesBasedOnTag = (tag_names) ->
     if (tag_names == "")
       $("#votes-table tr").each (index, element) ->
         $(element).show()
@@ -96,7 +124,7 @@ $ ->
       $(current_tags.split(".")).each (index, element) ->
         if (element != "")
           $("#votes-table .#{element}").fadeIn()
-  
+
   toggleTagClasses = (current_element, current_tag, current_tags) ->
     if ( current_tag == "everyone" && current_element.className != current_tag_filter)
       $(".group-tags button").each (index, element) ->
@@ -107,17 +135,17 @@ $ ->
     $(current_element).toggleClass(current_tag_filter)
     if ( current_tags == "" && current_tag != "everyone" )
       $(".group-tags #everyone").addClass(current_tag_filter)
-    
+
   refreshStatsGraph = ->
     yes_count = getVoteCount("yes")
     abstain_count = getVoteCount("abstain")
     no_count = getVoteCount("no")
     block_count = getVoteCount("block")
-    
+
     filtered_stats_data = [["Yes (#{yes_count})", yes_count, "Yes"], ["Abstain (#{abstain_count})", abstain_count, "Abstain"], ["No (#{no_count})", no_count, "No"], ["Block (#{block_count})", block_count, "Block"]]
-    
+
     $('#graph').empty()
-    
+
     this.pie_graph_view = new Tautoko.Views.Utils.GraphView
       el: '#graph.pie'
       id_string: 'graph'
@@ -125,9 +153,16 @@ $ ->
       data: filtered_stats_data
       type: 'pie'
       tooltip_selector: '#tooltip'
-  
+
   getVoteCount = (vote_type) ->
     vote_count = 0
-    if ($("#votes-table img[alt='#{vote_type} image']").is(":visible")) 
+    if ($("#votes-table img[alt='#{vote_type} image']").is(":visible"))
       vote_count = $("#votes-table img[alt='#{vote_type} image']").length
     return vote_count
+
+  # NOTE (Jon): We should implement a better method for scoping javascript to specific pages
+  # http://stackoverflow.com/questions/6167805/using-rails-3-1-where-do-you-put-your-page-specific-javascript-code
+  if $("#motion").length > 0
+    $("#description").html(linkify_html($("#description").html()))
+    $(".comment-body").each(-> $(this).html(linkify_html($(this).html())))
+

@@ -1,18 +1,21 @@
 class Motion < ActiveRecord::Base
-  #PHASES = %w[discussion voting closed]
   PHASES = %w[voting closed]
 
   belongs_to :group
   belongs_to :author, :class_name => 'User'
   belongs_to :facilitator, :class_name => 'User'
   has_many :votes
+  belongs_to :discussion
   validates_presence_of :name, :group, :author, :facilitator_id
   validates_inclusion_of :phase, in: PHASES
 
   delegate :email, :to => :author, :prefix => :author
   delegate :email, :to => :facilitator, :prefix => :facilitator
 
+  before_create :initialize_discussion
   after_create :email_motion_created
+
+  attr_accessor :create_discussion
 
   include AASM
   aasm :column => :phase do
@@ -54,19 +57,14 @@ class Motion < ActiveRecord::Base
     }.to_hash
   end
 
-  # Craig: This method seems too big, suggest refactoring (Extract Method).
   def votes_graph_ready
     votes_for_graph = []
     votes_breakdown.each do |k, v|
       votes_for_graph.push ["#{k.capitalize} (#{v.size})", v.size, "#{k.capitalize}", [v.map{|v| v.user.email}]]
     end
-    yet_to_vote_count = calculate_no_vote_count
-    text = "Yet to vote "
-    if (closed?)
-      text = "Did not vote "
-      yet_to_vote_count = no_vote_count
+    if votes.size == 0
+      votes_for_graph.push ["Yet to vote (#{no_vote_count})", no_vote_count, 'Yet to vote', [group.users.map{|u| u.email unless votes.where('user_id = ?', u).exists?}.compact!]]
     end
-    votes_for_graph.push [text + "(#{yet_to_vote_count})", yet_to_vote_count, 'Yet to vote', [group.users.map{|u| u.email unless votes.where('user_id = ?', u).exists?}.compact!]]
     return votes_for_graph
   end
 
@@ -116,7 +114,7 @@ class Motion < ActiveRecord::Base
   def has_closing_date?
     close_date == nil
   end
-  
+
   def has_group_user_tag(tag_name)
     has_tag = false
     votes.each do |vote|
@@ -129,7 +127,27 @@ class Motion < ActiveRecord::Base
     return has_tag
   end
 
+  def no_vote_count
+    if closed?
+      read_attribute(:no_vote_count)
+    else
+      calculate_no_vote_count
+    end
+  end
+
+  def group_count
+    group.users.count
+  end
+
+  def group_members
+    group.users
+  end
+
   private
+    def initialize_discussion
+      self.discussion = Discussion.create(author_id: author.id, group_id: group.id)
+    end
+
     def email_motion_created
       group.users.each do |user|
         unless author == user
@@ -148,5 +166,13 @@ class Motion < ActiveRecord::Base
 
     def clear_no_vote_count
       self.no_vote_count = nil
+    end
+
+    def only_one_discussion
+      if self["discussion_url"].present? && create_discussion
+        errors.add(:base,
+                   "Cannot have both a discussion and a discussion_url " +
+                   " (must contain only one or the other)")
+      end
     end
 end

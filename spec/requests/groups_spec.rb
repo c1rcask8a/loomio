@@ -16,8 +16,7 @@ describe "Groups" do
 
     it "can view their groups" do
       visit '/groups'
-
-      should have_selector('h1', text:'Your groups')
+      should have_selector('h3', text:'Groups')
     end
 
     context "admin of a group" do
@@ -48,9 +47,8 @@ describe "Groups" do
 
           visit group_path(@group)
 
-          should have_content("User Requests")
+          should have_content("Membership requests")
         end
-
         it "can see add member section" do
           visit group_path(@group)
 
@@ -78,7 +76,7 @@ describe "Groups" do
 
           visit group_path(@group)
 
-          should_not have_content("User Requests")
+          should_not have_content("Membership requests")
         end
 
         it "cannot see add member section" do
@@ -101,7 +99,7 @@ describe "Groups" do
 
           visit group_path(@group)
 
-          should have_content("User Requests")
+          should have_content("Membership requests")
         end
 
         it "can see add member section" do
@@ -116,7 +114,7 @@ describe "Groups" do
         visit group_path(@group)
 
         should have_content("Test Group")
-        should have_content("Users")
+        should have_content("Current members")
       end
 
       it "can click on 'Create a motion'" do

@@ -10,192 +10,140 @@ div.motion{
   box-shadow: 1px 1px 4px #999999;
   -webkit-box-shadow: 1px 1px 4px #999999;
   -moz-box-shadow: 1px 1px 4px #999999;
-  a{display: block; padding: 5px; margin-bottom: 0;}
-  .border{ border: solid 1px #ccc; min-height: 200px; }
-  .name{
-    font-weight: bold;
-    }
-  .group{
-    height: 2.0em;
-    a{display: block; float: left; padding: 4px; margin-bottom: 0;}
-    text-align: left;
-    background: #ececec;
-    a, a:visited, a:active {color: #999;}
-  }
 }
 
-.bordered{
-  border-top: 1px solid lightgrey;
-}
+.bordered{ border-top: 1px solid lightgrey; }
+.centered{ text-align: center; }
 
-.centered{
-  text-align: center;
-}
-.motions-list{
-  padding-top: 2px;
-  border-bottom: 1px solid lightgrey;
-  .vote-icon {padding-top: 10px;}
-  #motion-title{
-    font-size: 17px;
-    line-height: 20px;
+/*** Show Motion Page ***/
+#motion{
+  .label{
+    text-transform: lowercase;
+    font-weight: normal;
   }
-  .group-name {
-    font-size: 14px;
-    padding-left: 20px;
-    line-height: 20px;
-    a {color: grey;}
-  }
-  .close-info {
-    font-size: 14px;
+  #admin-buttons{
     text-align: right;
-    padding-top: 8px;
-    color: grey;
+    margin-top: 20px;
+    margin-left: 20px;
   }
-  .toggle-button{
-    padding-top: 6px;
-    font-weight: bold;
-    color: #999999;
-    text-align: center;
-  }
-  .action-links{
-    a{color: grey}
-    margin-top: -7px;
-    font-size: 12px;
-  }
-  .dashboard-motion-description{
-    font-size: 14px;
-    line-height: 1.4em;
-    margin-top: 10px;
-  }
-  .pie {
-    margin-left: 0px;
-    height: 170px;
-    /*.jqplot-table-legend{*/
-      /*background-color: #F9F9F9;*/
-    /*}*/
- }
-  #vote-buttons{
-    padding-top: 5px;
-    .sml-vote-btn{
-              border-radius: 1px;
-              webkit-border-radius: 5px;
-              moz-border-radius: 5px;
-              box-shadow: 1px 1px 4px #999999;
-              webkit-box-shadow: 1px 1px 4px #999999;
-              moz-box-shadow: 1px 1px 4px #999999;
-              padding: 5px;
-              padding-top: 10px;
-              padding-bottom: 3px;
-              }
-  }
-  #dash-vote-form{
-    .form-stacked{
-      padding-left: 0px;
-    }
-    input {
-      padding-top: 0px;
-      font-size: 14px;
-      width: 170px;
-    }
-  }
-}
-#closed-motion-list{
-  margin-top: 40px
-}
-
-.closed{
-  background-color: #F9F9F9;
-  #motion-title{ font-weight: normal; }
-}
-
-.voting{
-  background-color: #FFFFFF;
-  #motion-title{ font-weight: bold; }
-}
-
-#description_text{
-  p{font-size: 1.0em;}
-  margin-top: 40px;
-}
-/*Show Motions Page*/
-#admin-buttons{
-  margin-top: 20px;
-  margin-left: 20px;
-  .btn-mini{font-size: 8px;}
-}
-#discussion{
-  padding-top: 10px;
-  color: grey;
-}
-#other-info{color: lightgrey;}
-#motion-description{
-  p{font-size: 1.0em;}
-  margin-top: 30px;
-}
-#votes-table table{
-  font-size: 14px;
-  .vote-statement{
-    max-width: 300px;
-  }
-  margin-top: 50px;
-}
-#no-votes-msg{
-  font-size: 14px;
-}
-#stats{
-  float: right;
-  margin-left: 25px;
-  p{ text-align: right; padding-right: 15px;}
-}
-#graph {
-  width: 400px;
-  height: 250px;
-}
-#vote-buttons{
-  margin-left: 20px;
-  .btn.vote{
-            border-radius: 5px;
-            webkit-border-radius: 5px;
-            moz-border-radius: 5px;
-            box-shadow: 1px 1px 4px #999999;
-            webkit-box-shadow: 1px 1px 4px #999999;
-            moz-box-shadow: 1px 1px 4px #999999;
-            padding: 3px;
-            height: 40px;
-            }
-}
-
-/*Hidden vote form on show motions page*/
-#vote-form{
-  margin-top: 10px
-}
-
-#motion-form{
-  #closing-date-label{ padding-left: 150px; }
-  #input_date{
-    margin-left: 170px;
-    width: 140px;
-  }
-  /*#close-date {*/
-    /*display: inline;*/
-    /*.input{ display: inline; }*/
-  /*}*/
-  /*#motion_close_date{*/
-    /*width: 140px;*/
-    /*margin-left: 20px;*/
-  /*}*/
-  select{ width: 100px;}
+  #discussion{ padding-top: 10px; color: #555; }
   #description{
-    padding-left: 150px;
-    padding-top: 20px;
+    p{font-size: 1.0em;}
+    margin-top: 30px;
+    color: #555;
   }
-  #commit{padding-left: 150px;}
+  #still-to-vote{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    #still-to-vote-list { margin-top: 5px; }
+  }
+  #graph{
+    height: 300px;
+    margin-left: -20px;
+  }
+  #new_vote{ padding-left: 0px; }
+
+  #vote-form{
+    margin-top: 10px;
+    #vote-statement{ margin-left: 0px; padding-left: 0px; }
+    .input { margin-left: 0px; }
+    .clearfix { padding-top: 0px; padding-bottom: 0px; }
+    .char_count {
+      float: right;
+      padding-right: 70px;
+      color: #999999;
+      font-size: 12px;
+      margin-top: -6px;
+    }
+  }
+  #vote-buttons{
+    margin-top: -15px;
+    .btn.vote{
+      border-radius: 5px;
+      webkit-border-radius: 5px;
+      moz-border-radius: 5px;
+      box-shadow: 1px 1px 4px #999999;
+      webkit-box-shadow: 1px 1px 4px #999999;
+      moz-box-shadow: 1px 1px 4px #999999;
+      padding: 3px;
+      height: 40px;
+      }
+  }
+  #votes-table table{
+    font-size: 14px;
+    .vote-statement{
+      max-width: 300px;
+      color: black;
+    }
+    margin-top: 20px;
+  }
 }
 
-h2 { font-size: 24px; line-height: 26px; } /* Main Header */
-h3 { font-size: 16px; line-height: 20px; font-weight: normal; } /* Group sub header */
-h4 { font-size: 16px; line-height: 20px; font-weight: normal; color: lightgrey; padding-bottom: 5px; } /* label grey with bottom padding */
-h5 { font-size: 14px; line-height: 18px; font-weight: normal; } /* other details */
+/*** New & Edit motion ***/
+#motion-form{
+  padding-top: 10px;
+  #input_date{ width: 140px; }
+  select{ width: 100px;}
+  #closing-inputs{ padding-bottom: 10px; }
+}
+
+/*** Shared properties ***/
+
+#percentage-to-vote{ padding-bottom: 10px; }
+
+#discussion-panel{
+  padding-top: 20px;
+  padding-right: 20px;
+
+  #new-comment-form{
+    margin-bottom: 8px;
+
+    #new-comment{
+      width: 450px;
+      height: 80px;
+      font-size: 13px;
+      line-height: 16px;
+      color: black;
+    }
+
+    #new-comment-submit{
+      text-align: right;
+      .submit{
+        font-size: 13px;
+        margin-top: 8px;
+      }
+    }
+  }
+
+  .comment{
+    background-color: #EEE;
+    margin-bottom: 2px;
+    padding: 4px;
+
+    p{
+      font-size: 13px;
+      margin-bottom: 0px;
+      line-height: 16px;
+    }
+    .comment-time{
+      font-size: 12px;
+      color: grey;
+    }
+  }
+}
+
+#votes-panel{
+  padding-top: 20px;
+  padding-left: 19px;
+  border-left: 1px solid lightgrey;
+  margin-left: 0px;
+  width: 430px;
+}
+
+#closed-motion-list{
+  margin-top: 40px;
+  padding-bottom: 50px;
+}
 
 .group-tags .btn {
   font-size: 12px;

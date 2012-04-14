@@ -10,41 +10,10 @@ $token-input-width: 278px;
   height: 15px;
 }
 
-div.token-input-dropdown-facebook {
-  width: $token-input-width !important;
-}
-
-ul.token-input-list-facebook {
-  line-height: $token-input-line-height;
-  font-size: $token-input-font-size;
-  width: $token-input-width !important;
-}
-
-ul.token-input-list-facebook li {
-  line-height: $token-input-line-height;
-}
-
-ul.token-input-list-facebook p {
-  line-height: $token-input-line-height;
-  font-size: $token-input-font-size;
-}
-
-div.token-input-dropdown-facebook p {
-  line-height: $token-input-line-height;
-  font-size: $token-input-font-size;
-}
-
-.token-input-input-token-facebook input {
-  line-height: $token-input-line-height;
-  font-size: $token-input-font-size;
-  height: auto;
-  width: 50px !important;
-}
+/**** Group admin ****/
 #group {
-  h1 { margin-bottom: 0px; }
   .btn.small { font-size: 12px }
   #right-panel {
-    margin-top: 10px;
     #membership-requested { width: 200px; }
   }
 }
@@ -53,63 +22,126 @@ div.token-input-dropdown-facebook p {
   form {
     width: 550px;
     #group_name { width: 390px; }
-    label { text-align: left; }
     .privacy-settings {
-      label { width: 400px; }
+      .setting { padding-top: 20px; }
       select { width: 150px; }
       .input { text-align: right; }
     }
-    /*#group_name_input .input { margin-left: 0px; }*/
-    /*.radio-hint {*/
-      /*font-size: .8em;*/
-    /*}*/
-
-    /*.choice {*/
-      /*border-bottom: 1px lightgrey solid;*/
-    /*}*/
   }
 }
 
-#user_email_input {
-  display: inline;
-  .input {
+/**** Group page ****/
+.group-title {
+  padding-top: 20px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #888;
+  .btn { float: right; margin-top: -12px; }
+}
+
+#btn-create-motion{ float: right; margin-top: -8px;}
+
+#member-panel {
+  padding-top: 23px;
+  #user_email_input {
     display: inline;
-    margin-left: 0px;
+    .input {
+      display: inline;
+      margin-left: 0px;
+    }
+    #user_email {
+      width: 270px;
+      margin-top: 5px;
+    }
   }
-  #user_email {
-    width: 250px;
+  #user-form{
+    #member-email-input { padding-top: 10px; }
+    #user-list{ padding-top: 4px; }
+  }
+  #request-list {
+    margin-top: 8px;
+  }
+  #button-invite {
+    margin-top: 5px;
+    text-align: right;
+  }
+  #member-requests{ margin-top: 5px; display: inline; }
+  #users-list {
+    width: 270px;
+    margin-top: 15px;
+  }
+  #editable-user-row{ margin-top: -10px; }
+  #uneditable-user { display: inline; }
+  #uneditable-tag-list { display: inline; }
+  .uneditable-tag {
+    border: 0px;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    font-size: 10px;
+    padding: 2px;
+    padding-left: 3px;
+    line-height: 10px;
+    background-color: #EFF2F7;
+    display: inline;
+    margin-left: 3px;
+    }
+  div.token-input-dropdown-facebook {
+  }
+  ul.token-input-list-facebook {
+    line-height: $token-input-line-height;
+    font-size: $token-input-font-size;
+    width: $token-input-width !important;
+    border-color: whitesmoke;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    margin-top: -2px;
+  }
+  ul.token-input-list-facebook li {
+    line-height: 10px;
+    border: 0px;
+    padding-bottom: 2px;
+  }
+  ul.token-input-list-facebook p {
+    line-height: $token-input-line-height;
+    font-size: 9px;
+    color: grey;
+  }
+  div.token-input-dropdown-facebook p {
+    line-height: $token-input-line-height;
+    font-size: $token-input-font-size;
+  }
+  .token-input-input-token-facebook input {
+    line-height: $token-input-line-height;
+    font-size: $token-input-font-size;
+    height: auto;
+    width: 50px !important;
+  }
+  ul.membership-row li {
+    display: block;
+    font-size: 14px;
+    float: left;
+  }
+  ul.membership-row li.name-label {
+  }
+  ul.membership-row li.membership-admin-functions {
+    float:right;
+  }
+  .unstyled.membership-row.tags {
+    float: left;
   }
 }
-#user-form{
-  #member-email-input { padding-top: 10px; }
-  #user-list{ padding-top: 4px;}
-}
-h1 { font-size: 24px; line-height: 36px; }
 
-ul.membership-row li {
-  display: inline;
-  font-size: 14px;
-  float: left;
-}
-
-ul.membership-row li.membership-admin-functions {
-  font-size: 12px;
-  float:right;
+/**** dashboard ****/
+.group-panel {
+  margin-top: 9px;
+  #group-list {
+    margin-top: 4px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
 }
 
-ul.membership-row li.name-label {
-  width: 180px;
-}
-
-ul.membership-row li.tags-label {
-  margin-right: 10px;
-  font-size: 12px;
-}
-
-#users-list {
-  width: 319px;
-}
-
-.unstyled.membership-row.tags {
-  float: left;
-}
+/**** general ****/
+.links{ display: inline; float: right; padding-top: 6px; }
+.title-row { background-color: #EEE; padding: 4px; color: #555; }

@@ -13,6 +13,33 @@
 
 ActiveRecord::Schema.define(:version => 20120413230747) do
 
+  create_table "comments", :force => true do |t|
+    t.integer  "commentable_id",   :default => 0
+    t.string   "commentable_type", :default => ""
+    t.string   "title",            :default => ""
+    t.text     "body"
+    t.string   "subject",          :default => ""
+    t.integer  "user_id",          :default => 0,  :null => false
+    t.integer  "parent_id"
+    t.integer  "lft"
+    t.integer  "rgt"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "comments", ["commentable_id"], :name => "index_comments_on_commentable_id"
+  add_index "comments", ["user_id"], :name => "index_comments_on_user_id"
+
+  create_table "discussions", :force => true do |t|
+    t.integer  "group_id"
+    t.integer  "author_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "discussions", ["author_id"], :name => "index_discussions_on_author_id"
+  add_index "discussions", ["group_id"], :name => "index_discussions_on_group_id"
+
   create_table "groups", :force => true do |t|
     t.string   "name"
     t.datetime "created_at"
@@ -38,11 +65,15 @@ ActiveRecord::Schema.define(:version => 20120413230747) do
     t.integer  "facilitator_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "phase",          :default => "voting", :null => false
-    t.string   "discussion_url", :default => "",       :null => false
+    t.string   "phase",              :default => "voting", :null => false
+    t.string   "discussion_url",     :default => "",       :null => false
     t.integer  "no_vote_count"
     t.datetime "close_date"
+    t.integer  "discussion_id"
+    t.boolean  "disable_discussion", :default => false
   end
+
+  add_index "motions", ["discussion_id"], :name => "index_motions_on_discussion_id"
 
   create_table "taggings", :force => true do |t|
     t.integer  "tag_id"
