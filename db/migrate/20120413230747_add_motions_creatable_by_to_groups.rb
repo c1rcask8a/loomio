@@ -10,6 +10,6 @@ class AddMotionsCreatableByToGroups < ActiveRecord::Migration
   end
 
   def down
-    remove_column :groups, :motions_creatable_by, :string
+    remove_column :groups, :motions_creatable_by
   end
 end
