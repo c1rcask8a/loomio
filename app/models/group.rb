@@ -154,5 +154,6 @@ class Group < ActiveRecord::Base
     def set_defaults
       self.viewable_by ||= :everyone
       self.members_invitable_by ||= :members
+      self.motions_creatable_by ||= :members
     end
 end
