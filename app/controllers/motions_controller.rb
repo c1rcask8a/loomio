@@ -23,13 +23,6 @@ class MotionsController < GroupBaseController
     group = Group.find(params[:group_id])
     
     @motion = Motion.new(group: group)
-    
-    #if group.can_create_motion?(user) || (!current_user.nil? && :check_motion_create_permissions)
-    #if :check_motion_create_permissions
-    #  @motion = Motion.new(group: group)
-    #else
-    #  redirect_to group
-    #end
   end
 
   def create
@@ -51,17 +44,6 @@ class MotionsController < GroupBaseController
     else
       redirect_to edit_motion_path(@motion)
     end
-    
-    #if @motion.group.anon_motion_creation || (!current_user.nil? && :check_motion_create_permissions)
-    #if :check_motion_create_permissions
-    #  if @motion.save
-    #    redirect_to @motion
-    #  else
-    #    redirect_to edit_motion_path(@motion)
-    #  end
-    #else 
-    #  redirect_to @motion.group
-    #end
   end
 
   def destroy
