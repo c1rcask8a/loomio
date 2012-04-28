@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120424221314) do
+ActiveRecord::Schema.define(:version => 20120428041602) do
 
   create_table "comment_votes", :force => true do |t|
     t.integer  "comment_id"
@@ -87,7 +87,6 @@ ActiveRecord::Schema.define(:version => 20120424221314) do
     t.datetime "updated_at"
     t.string   "phase",               :default => "voting", :null => false
     t.string   "discussion_url",      :default => "",       :null => false
-    t.integer  "no_vote_count"
     t.datetime "close_date"
     t.integer  "discussion_id"
     t.boolean  "disable_discussion",  :default => false

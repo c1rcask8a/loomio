@@ -37,7 +37,6 @@ class VotesController < GroupBaseController
     if @motion.voting?
       params[:vote].delete(:id)
       @vote = Vote.new(params[:vote])
-      ap params
       @vote.motion = @motion
       @vote.user = current_user
       if @vote.save

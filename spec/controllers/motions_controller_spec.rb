@@ -21,6 +21,7 @@ describe MotionsController do
 
     it "can close a motion" do
       motion.should_receive(:set_close_date)
+      motion.should_receive(:store_yet_to_vote)
       post :close_voting, id: motion.id
     end
 

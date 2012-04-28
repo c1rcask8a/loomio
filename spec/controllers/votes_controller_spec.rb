@@ -29,7 +29,7 @@ describe VotesController do
              vote: {position: 'no', statement: 'blah'}
         response.should be_redirect
         flash[:notice].should =~ /Vote updated/
-        Vote.first.position.should == 'no'
+        Vote.last.position.should == 'no'
       end
 
       it 'can delete vote' do

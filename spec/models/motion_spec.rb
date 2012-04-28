@@ -96,6 +96,8 @@ describe Motion do
       user2.save
       user3 = User.make
       user3.save
+      user4 = User.make
+      user4.save
       @motion.group.add_member!(user1)
       @motion.group.add_member!(user2)
       @motion.group.add_member!(user3)
@@ -106,6 +108,12 @@ describe Motion do
     end
 
     context "motion closed" do
+      it "stores uses yet to vote" do
+        user4 = User.make
+        user4.save
+        @motion.store_yet_to_vote
+        Vote.last.position.should == "did_not_vote"
+      end
       it "records and freezes no_vote_count" do
         @motion.no_vote_count.should == 2
         @motion.group.add_member!(User.make!)
