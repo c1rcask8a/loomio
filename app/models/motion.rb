@@ -6,7 +6,7 @@ class Motion < ActiveRecord::Base
   belongs_to :facilitator, :class_name => 'User'
   belongs_to :discussion
   has_many :votes
-  has_many :motion_activity_read_logs
+  has_many :motion_read_logs
 
   validates_presence_of :name, :group, :author, :facilitator_id
   validates_inclusion_of :phase, in: PHASES
@@ -30,11 +30,11 @@ class Motion < ActiveRecord::Base
     state :voting, :initial => true
     state :closed
 
-    event :open_voting, :after => :clear_no_vote_count do
+    event :open_voting, :after => :after_open do
       transitions :to => :voting, :from => [:voting, :closed]
     end
 
-    event :close_voting, :after => :store_no_vote_count do
+    event :close_voting, :before => :before_close  do
       transitions :to => :closed, :from => [:voting, :closed]
     end
   end
@@ -53,44 +53,6 @@ class Motion < ActiveRecord::Base
     .where('votes.user_id = ?', user.id)
     .having('count(votes.id) = 0')
   }
-
-  #def user_has_voted?(user)
-    #votes.map{|v| v.user.id}.include? user.id
-  #end
-
-  def with_votes
-    votes if votes.size > 0
-  end
-
-  def blocked?
-    votes.each do |v|
-      if v.position == "block"
-        return true
-      end
-    end
-    false
-  end
-
-  def has_admin_user?(user)
-    group.has_admin_user?(user)
-  end
-
-  def user_has_voted?(user)
-    votes.for_user(user).each do |vote|
-      unless vote.position == "did_not_vote"
-        return true
-      end
-    end
-    false
-  end
-
-  def no_vote_count
-    if voting?
-      group_members.count - votes.
-    else
-      votes.where(position == 'did_not_vote').count
-    end
-  end
 
   def can_be_viewed_by?(user)
     user && group.can_be_viewed_by?(user)
@@ -112,15 +74,61 @@ class Motion < ActiveRecord::Base
     user && group.users.include?(user)
   end
 
+  def with_votes
+    votes if votes.size > 0
+  end
+
+
+  def has_admin_user?(user)
+    group.has_admin_user?(user)
+  end
+
+  def user_has_voted?(user)
+    user_vote = votes.where("user_id = ? AND motion_id = ?", user, self).last
+    unless user_vote.nil?
+      unless user_vote.position == "did_not_vote"
+        return true
+      end
+    end
+    false
+  end
+
+  def no_vote_count
+    if voting?
+      group_members.count - members_voted
+    else
+      members_did_not_vote
+    end
+  end
+
+  def members_voted
+    count = 0
+    group_members.each do |member|
+      if user_has_voted?(member)
+        count += 1
+      end
+    end
+    count
+  end
+
+  def members_did_not_vote
+    members_count_when_closed - members_voted
+  end
+
+  def members_count_when_closed
+    Vote.find_by_sql("SELECT * FROM votes a WHERE created_at = (SELECT MAX(created_at) as created_at FROM votes b WHERE a.user_id = b.user_id AND motion_id = #{id} )").count
+  end
+
   def open_close_motion
     if close_date && close_date <= Time.now
       if voting?
         close_voting
+        save
       end
     else
       open_voting
+      save
     end
-    save
   end
 
   def set_close_date(date)
@@ -133,62 +141,32 @@ class Motion < ActiveRecord::Base
     close_date == nil
   end
 
-  def has_group_user_tag(tag_name)
-    has_tag = false
-    votes.each do |vote|
-      vote.user.group_tags_from(group).each do |tag|
-        if tag == tag_name
-          return has_tag = true
-        end
+  def blocked?
+    votes.each do |v|
+      if v.position == "block"
+        return true
       end
     end
-    return has_tag
+    false
   end
 
-  def no_vote_count
-    if closed?
-      read_attribute(:no_vote_count)
-    else
-      calculate_no_vote_count
-    end
-  end
-
-  def store_yet_to_vote
-    if group_count > 0
-      group_members.each do |member|
-        unless user_has_voted?(member)
-          vote = Vote.new(motion: self, position: 'did_not_vote', user: member)
-          vote.save
-        end
-      end
-    end
-  end
-
-  def votes_breakdown
-    last_votes = Vote.unique_votes(self)
-    positions = Vote::POSITIONS
-    positions.delete("did_not_vote")
-    positions.map {|position|
-      [position, last_votes.find_all{|vote| vote.position == position}]
-    }.to_hash
-  end
-
-  def votes_graph_ready
-    votes_for_graph = []
-    votes_breakdown.each do |k, v|
-      votes_for_graph.push ["#{k.capitalize} (#{v.size})", v.size, "#{k.capitalize}", [v.map{|v| v.user.email}]]
-    end
-    if votes.size == 0
-      votes_for_graph.push ["Yet to vote (#{no_vote_count})", no_vote_count, 'Yet to vote', [group.users.map{|u| u.email unless votes.where('user_id = ?', u).exists?}.compact!]]
-    end
-    return votes_for_graph
-  end
+  #def has_group_user_tag(tag_name)
+    #has_tag = false
+    #votes.each do |vote|
+      #vote.user.group_tags_from(group).each do |tag|
+        #if tag == tag_name
+          #return has_tag = true
+        #end
+      #end
+    #end
+    #return has_tag
+  #end
 
   def group_count
     if voting?
-      group.users.count
-      #else
-      #votes.where(position == 'did_not_vote').count
+      group_members.count
+    else
+      members_count_when_closed
     end
   end
 
@@ -210,7 +188,58 @@ class Motion < ActiveRecord::Base
     discussion.comments
   end
 
+  def store_yet_to_vote
+    group_members.each do |member|
+      unless user_has_voted?(member)
+        vote = Vote.new(motion: self, position: 'did_not_vote', user: member)
+        vote.save
+      end
+    end
+  end
+
+  def clear_yet_to_vote
+    votes.each do |vote|
+      if vote.position == 'did_not_vote'
+        vote.delete
+        vote.save!
+      end
+    end
+  end
+
+  def votes_breakdown
+    last_votes = Vote.unique_votes(self)
+    positions = Array.new(Vote::POSITIONS)
+    positions.delete("did_not_vote")
+    positions.map {|position|
+      [position, last_votes.find_all{|vote| vote.position == position}]
+    }.to_hash
+  end
+
+  def votes_graph_ready
+    votes_for_graph = []
+    votes_breakdown.each do |k, v|
+      votes_for_graph.push ["#{k.capitalize} (#{v.size})", v.size, "#{k.capitalize}", [v.map{|v| v.user.email}]]
+    end
+    if votes.size == 0
+      votes_for_graph.push ["Yet to vote (#{no_vote_count})", no_vote_count, 'Yet to vote', [group.users.map{|u| u.email unless votes.where('user_id = ?', u).exists?}.compact!]]
+    end
+    return votes_for_graph
+  end
+
   private
+    def after_open
+      save
+      clear_yet_to_vote
+      self.close_date = Time.now + 1.week
+      save
+    end
+
+    def before_close
+      store_yet_to_vote
+      self.close_date = Time.now
+      save
+    end
+
     def initialize_discussion
       self.discussion ||= Discussion.create(author_id: author.id, group_id: group.id)
     end
@@ -227,15 +256,6 @@ class Motion < ActiveRecord::Base
       unless self.discussion_url.match(/^http/) || self.discussion_url.empty?
         self.discussion_url = "http://" + self.discussion_url
       end
-    end
-
-    #def calculate_no_vote_count
-      #vote.where(position == 'did_not_vote').count
-      #group.memberships.size - votes.size
-    #end
-
-    def calculate_group_count
-      votes.count + no_vote_count
     end
 
     def set_disable_discussion

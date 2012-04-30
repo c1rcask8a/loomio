@@ -15,18 +15,18 @@ class Vote < ActiveRecord::Base
     end
   end
 
-  POSITIONS = %w[yes abstain no block did_not_vote]
   # TODO get counter_cache working
   belongs_to :motion#, :counter_cache => :votes_counter
   belongs_to :user
 
+  POSITIONS = %w[yes abstain no block did_not_vote]
   validates_presence_of :motion, :user, :position
   validates_inclusion_of :position, in: POSITIONS
   validates_length_of :statement, maximum: 250
   validates :user_id, user_can_vote: true
   validates :position, :statement, closable: true
 
-  scope :for_user, lambda {|user| where(:user_id => user)}
+  #scope :for_user, lambda {|user| where(:user_id => user)}
 
   attr_accessor :old_position
 
@@ -34,6 +34,10 @@ class Vote < ActiveRecord::Base
 
   after_save :send_notifications
   after_save :update_activity
+
+  def self.for_user(user)
+    Vote.where(:user_id => user).last
+  end
 
   def position=(new_position)
     self.old_position = position

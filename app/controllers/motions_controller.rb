@@ -43,14 +43,13 @@ class MotionsController < GroupBaseController
 
   def close_voting
     resource
-    @motion.store_yet_to_vote
-    @motion.set_close_date(Time.now)
+    @motion.close_voting
     redirect_to motion_path(@motion)
   end
 
   def open_voting
     resource
-    @motion.set_close_date(Time.now + 1.week)
+    @motion.open_voting
     redirect_to motion_path(@motion)
   end
 
@@ -88,8 +87,7 @@ class MotionsController < GroupBaseController
     def check_motion_destroy_permissions
       unless resource.can_be_deleted_by?(current_user)
         flash[:error] = "You do not have permission to delete this motion."
-    :w
-    redirect_to :back
+        redirect_to :back
       end
     end
 

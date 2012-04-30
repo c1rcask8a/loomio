@@ -11,12 +11,35 @@ describe Motion do
   it {should have(1).errors_on(:group)}
   it {should have(1).errors_on(:facilitator_id)}
 
-  it "user_has_votes?(user) returns true if the given user has voted on motion" do
-    @user = User.make!
-    @motion = create_motion(:author => @user)
-    @vote = Vote.make(:user => @user, :motion => @motion, :position => "yes")
-    @vote.save!
-    @motion.user_has_voted?(@user).should == true
+  context "user has voted" do
+    it "user_has_votes?(user) returns true" do
+      @user = User.make!
+      @motion = create_motion(:author => @user)
+      @vote = Vote.make(:user => @user, :motion => @motion, :position => "yes")
+      @vote.save!
+      @motion.user_has_voted?(@user).should == true
+    end
+  end
+
+  context "user has not voted" do
+    context "motion is open" do
+      it "user_has_votes?(user) returns false" do
+        @user1 = User.make!
+        @motion1 = create_motion(:author => @user1)
+        @motion1.user_has_voted?(@user1).should == false
+      end
+    end
+
+    context "motion is closed" do
+      it "user_has_votes?(user) returns false" do
+        @user2 = User.make
+        @user2.save
+        @motion2 = create_motion(:author => @user2)
+        @vote2 = Vote.make(:user => @user2, :motion => @motion2, :position => "did_not_vote")
+        @vote2.save!
+        @motion2.user_has_voted?(@user2).should == false
+      end
+    end
   end
 
   it "sends notification email to group members on successful create" do
@@ -90,47 +113,45 @@ describe Motion do
   context "users have voted" do
     before :each do
       @motion = create_motion
-      user1 = User.make
-      user1.save
-      user2 = User.make
-      user2.save
-      user3 = User.make
-      user3.save
-      user4 = User.make
-      user4.save
+      user1 = @motion.author
+      user2 = @motion.facilitator
+      @user3 = User.make
+      @user3.save
+      @user4 = User.make
+      @user4.save
       @motion.group.add_member!(user1)
       @motion.group.add_member!(user2)
-      @motion.group.add_member!(user3)
+      @motion.group.add_member!(@user3)
+      @motion.group.add_member!(@user4)
       Vote.create!(position: 'yes', motion: @motion, user: user1)
       Vote.create!(position: 'no', motion: @motion, user: user2)
-      Vote.create!(position: 'yes', motion: @motion, user: user3)
+      Vote.create!(position: 'yes', motion: @motion, user: @user3)
       @motion.close_voting
     end
 
-    context "motion closed" do
-      it "stores uses yet to vote" do
-        user4 = User.make
-        user4.save
-        @motion.store_yet_to_vote
-        Vote.last.position.should == "did_not_vote"
-      end
-      it "records and freezes no_vote_count" do
-        @motion.no_vote_count.should == 2
-        @motion.group.add_member!(User.make!)
-        @motion.no_vote_count.should == 2
-      end
+    it "members_voted returns number who voted" do
+      @motion.members_voted.should == 3
     end
 
-    context "motion re-opened" do
-      before :each do
-        @motion.open_voting
-      end
+    it "members_count_when_closed returns group size at time of close" do
+      user5 = User.make
+      user5.save
+      @motion.group.add_member!(user5)
+      @motion.members_count_when_closed.should == 4
+    end
 
-      it "no_vote_count should not be frozen" do
-        @motion.no_vote_count.should == 2
-        @motion.group.add_member!(User.make!)
-        @motion.no_vote_count.should == 3
-      end
+    it "members_did_not_vote returns number who did not vote" do
+      @motion.members_did_not_vote.should == 1
+    end
+
+    it "store_yet_to_vote should create votes for users who did not vote" do
+      @motion.votes.for_user(@user3).position.should_not == "did_not_vote"
+      @motion.votes.for_user(@user4).position.should == "did_not_vote"
+    end
+
+    it "clear_yet_to_vote should delete votes for users who did not vote" do
+      @motion.open_voting
+      @motion.votes.for_user(@user4).should == nil
     end
   end
 end
